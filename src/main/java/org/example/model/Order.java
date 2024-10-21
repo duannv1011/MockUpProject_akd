@@ -1,28 +1,29 @@
 package org.example.model;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
-import java.util.List;
-
+import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class Order {
     private String id;
     private String customerId;
-    private List<OrderItem> productQuantities;
+    private Map<String, Integer> productQuantities = new HashMap<>();
     private String orderDate;
+    private double totalPrice;
 
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Data
-    static
-    class OrderItem {
-        private String productId;
-        private int quantity;
-
+    public void calculateTotal(List<Product> products) {
+        totalPrice = productQuantities.entrySet().stream()
+                .mapToDouble(entry -> {
+                    String productId = entry.getKey();
+                    int quantity = entry.getValue();
+                    return products.stream()
+                            .filter(product -> product.getId().equals(productId))
+                            .findFirst()
+                            .map(product -> product.getPrice() * quantity) // Giá * số lượng
+                            .orElse(0.0); // Nếu không tìm thấy sản phẩm, giá = 0
+                })
+                .sum();
     }
 }
