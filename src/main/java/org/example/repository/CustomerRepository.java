@@ -1,6 +1,5 @@
 package org.example.repository;
 
-
 import com.opencsv.exceptions.CsvException;
 import org.example.data.manager.CustomerDataManager;
 import org.example.model.Customer;
@@ -21,7 +20,11 @@ public class CustomerRepository {
     public List<Customer> loadCustomers(String filePath) {
         try {
             customerDataLoader.loadData(filePath);
-            errorRepository.addError(customerDataLoader.getErrors());
+
+            for (ValidationError error : getErrors()) {
+                System.out.println(error);
+            }
+            errorRepository.addError(getErrors());
             return customerDataLoader.getData();
         } catch (IOException | CsvException e) {
             throw new RuntimeException(e);
@@ -37,6 +40,7 @@ public class CustomerRepository {
             throw new RuntimeException(e);
         }
     }
+
     public List<ValidationError> getErrors() {
         return customerDataLoader.getErrors();
     }

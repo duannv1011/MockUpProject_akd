@@ -1,48 +1,34 @@
 package org.example.validator;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.example.model.Customer;
+import org.example.variable.common.CSVColumn;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class CustomerValidator extends BaseValidator<Customer> {
+    private final String MODEL = "Customer";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[\\w-.]+@[\\w-]+\\.[a-zA-Z]{2,}$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\d{10,15}$"); // Giả định số điện thoại có 10-15 chữ số
+
     public CustomerValidator(List<Customer> existingCustomers) {
         super(existingCustomers);
     }
-    @Override
-    public List<ValidationError> validate(Customer customer) {
-        List<ValidationError> errors = new ArrayList<>(validateId(customer.getId(), "Customer"));
 
-        if (customer.getName() == null || customer.getName().trim().isEmpty()) {
-            errors.add(new ValidationError("Customer", "Validation Errors", new String[]{"Customer name cannot be empty"}));
-        }
-        if (customer.getEmail() == null || customer.getEmail().trim().isEmpty()) {
-            errors.add(new ValidationError("Customer", "Validation Errors", new String[]{"Email cannot be empty"}));
-        } else if (!isValidEmail(customer.getEmail())) {
-            errors.add(new ValidationError("Customer", "Validation Errors", new String[]{"Invalid email format: " + customer.getEmail()}));
-        }
-        if (customer.getPhoneNumber() != null && !customer.getPhoneNumber().trim().isEmpty()) {
-            if (!isValidPhoneNumber(customer.getPhoneNumber())) {
-                errors.add(new ValidationError("Customer", "Validation Errors", new String[]{"Invalid phone number format: " + customer.getPhoneNumber()}));
-            }
-        }
-
-        return errors;
-    }
-
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-        Pattern pattern = Pattern.compile(emailRegex);
-        return pattern.matcher(email).matches();
-    }
-
-    private boolean isValidPhoneNumber(String phoneNumber) {
-        return phoneNumber.matches("\\d{10,15}");
-    }
 
     @Override
-    protected String getId(Customer item) {
-        return item.getId();
+    public ValidationError validate(Customer item, String line) {
+        List<String> messages = new ArrayList<>();
+        messages.addAll(validateId(item.getId(), CSVColumn.CustomerColumn.ID.getDescription(), true));
+        messages.add(isEmpty(item.getName(), CSVColumn.CustomerColumn.NAME.getDescription()));
+        messages.addAll(matchingRegex(item.getEmail(), EMAIL_PATTERN, CSVColumn.CustomerColumn.EMAIL.getDescription(), true));
+        messages.addAll(matchingRegex(item.getPhoneNumber(), PHONE_PATTERN, CSVColumn.CustomerColumn.PHONE.getDescription(), true));
+        messages.removeIf(ObjectUtils::isEmpty);
+        if (!messages.isEmpty()) {
+            return new ValidationError(MODEL, line, messages.toArray(new String[0]));
+        }
+        return null;
     }
 }

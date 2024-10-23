@@ -21,9 +21,10 @@ public class Order {
                     return products.stream()
                             .filter(product -> product.getId().equals(productId))
                             .findFirst()
-                            .map(product -> product.getPrice() * quantity) // Giá * số lượng
-                            .orElse(0.0); // Nếu không tìm thấy sản phẩm, giá = 0
+                            .map(product -> product.getPrice() * quantity)
+                            .orElse(0.0);
                 })
                 .sum();
     }
+
 }

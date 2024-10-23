@@ -16,11 +16,7 @@ public class ErrorService {
       return   errorRepository.getErrors();
     }
     public void  saveErrors() {
-        try {
-            errorRepository.saveErrors(CSVFilePath.ERROR_OUTPUT_PATH.getFilePath());
+        errorRepository.saveErrors(CSVFilePath.ERROR_OUTPUT_PATH.getFilePath());
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

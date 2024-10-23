@@ -1,7 +1,11 @@
 package org.example.validator;
 
-import java.util.List;
+import org.example.until.FilePathContext;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public abstract class BaseValidator<T> implements Validator<T> {
     protected final List<T> existingItems;
@@ -9,24 +13,77 @@ public abstract class BaseValidator<T> implements Validator<T> {
     public BaseValidator(List<T> existingItems) {
         this.existingItems = existingItems;
     }
-
-    protected List<ValidationError> validateId(String id, String modelName) {
-        List<ValidationError> errors = new ArrayList<>();
+    protected String getFilePath() {
+        return FilePathContext.getInstance().getFilePath();
+    }
+    protected List<String> validateId(String value, String fieldName, boolean isUniqueCheck) {
         List<String> messages = new ArrayList<>();
-
-        if (id == null || id.isEmpty()) {
-            messages.add(modelName + " ID cannot be empty");
+        String emptyMessage = isEmpty(value, fieldName);
+        if (emptyMessage != null) {
+            messages.add(emptyMessage);
         }
-        if (existingItems.stream().anyMatch(item -> getId(item).equals(id))) {
-            messages.add(modelName + " ID already exists: " + id);
+        if (isUniqueCheck) {
+            messages.add(isExist(value, fieldName));
         }
-
-        if (!messages.isEmpty()) {
-            errors.add(new ValidationError(modelName, "Validation Errors", messages.toArray(new String[0])));
-        }
-
-        return errors;
+        return messages;
     }
 
-    protected abstract String getId(T item);
+    protected String validateNumeric(Number value, String fieldName) {
+        if (value == null || value.doubleValue() < 0) {
+            return fieldName + " must be greater than or equal to 0";
+        }
+        return null;
+    }
+
+    protected String isEmpty(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            return fieldName + " cannot be empty";
+        }
+        return null;
+    }
+    protected String matchingRegex(String value, Pattern pattern, String fieldName) {
+        if (value == null || !pattern.matcher(value).matches()) {
+            return fieldName + "is invalid format" ;
+        }
+        return null;
+    }
+    protected List<String> matchingRegex(String value, Pattern pattern, String fieldName, boolean isUniqueCheck) {
+        List<String> messages = new ArrayList<>();
+
+        if (value == null || !pattern.matcher(value).matches()) {
+            messages.add( fieldName + "is invalid format");
+        }
+        if (isUniqueCheck) {
+            messages.add(isExist(value, fieldName));
+        }
+
+        return messages;
+    }
+
+
+    protected String isExist(String value, String fieldName) {
+        if (existingItems.stream().anyMatch(item -> getItem(item, fieldName).equals(value))) {
+            return fieldName + " already exists: " + value;
+        }
+        return null;
+    }
+
+    protected String getItem(T item, String fieldName) {
+        try {
+            Field field = item.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Object value = field.get(item);
+            return value != null ? value.toString() : null;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    protected ValidationError addAllMessage(String line, String[] messages) {
+        ValidationError error = new ValidationError();
+        error.setLine(line);
+        error.setMessage(messages);
+        return error;
+    }
 }

@@ -3,10 +3,10 @@ package org.example.variable.common;
 public class CSVColumn {
 
     public enum ProductColumn {
-        ID(0, "Product Id"),
-        NAME(1, "Product Name"),
-        PRICE(2, "Product Price"),
-        STOCK_AVAILABLE(3, "Product Stock Available");
+        ID(0, "id"),
+        NAME(1, "name"),
+        PRICE(2, "price"),
+        STOCK_AVAILABLE(3, "stockAvailable");
 
         private final int index;
         private final String description;
@@ -26,10 +26,10 @@ public class CSVColumn {
     }
 
     public enum CustomerColumn {
-        ID(0, "Customer Id"),
-        NAME(1, "Customer Name"),
-        EMAIL(2, "Customer Email"),
-        PHONE(3, "Customer Phone");
+        ID(0, "id"),
+        NAME(1, "name"),
+        EMAIL(2, "email"),
+        PHONE(3, "phoneNumber");
 
         private final int index;
         private final String description;

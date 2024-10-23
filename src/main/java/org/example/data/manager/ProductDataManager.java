@@ -4,6 +4,7 @@ import com.opencsv.exceptions.CsvException;
 import org.example.model.Product;
 import org.example.variable.common.CSVColumn;
 import org.example.validator.ProductValidator;
+import org.example.variable.common.CSVFilePath;
 
 import java.io.IOException;
 
@@ -21,7 +22,6 @@ public class ProductDataManager extends BaseDataManager<Product> {
                 Integer.parseInt(data[CSVColumn.ProductColumn.STOCK_AVAILABLE.getIndex()])
         );
     }
-
     @Override
     public void loadData(String filePath) throws IOException, CsvException {
         setValidator(new ProductValidator(getData()));

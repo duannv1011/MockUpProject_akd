@@ -17,14 +17,18 @@ public class ProductRepository {
         this.errorRepository = errorRepository;
     }
 
-    public List<Product> loadProducts(String filePath) throws IOException, CsvException {
-        productDataLoader.loadData(filePath);
-        errorRepository.addError(productDataLoader.getErrors());
-        return productDataLoader.getData();
+    public void loadProducts(String filePath) {
+        try {
+            productDataLoader.loadData(filePath);
+            errorRepository.addError(getErrors());
+        } catch (IOException | CsvException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
-    public void saveProducts(String filePath)  {
+
+    public void saveProducts(String filePath) {
         try {
             productDataLoader.saveData(filePath);
 
@@ -33,7 +37,7 @@ public class ProductRepository {
         }
     }
 
-    public List<ValidationError> getErrors() {
+    public List<ValidationError> getErrors(){
         return productDataLoader.getErrors();
     }
 }

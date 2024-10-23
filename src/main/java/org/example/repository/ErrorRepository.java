@@ -1,9 +1,11 @@
 package org.example.repository;
 
+import com.opencsv.CSVWriter;
 import lombok.Getter;
 import org.example.validator.ValidationError;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,12 +19,22 @@ public class ErrorRepository {
     public void addError(List<ValidationError> error) {
         errors.addAll(error);
     }
-    public void saveErrors(String filepath) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))) {
+
+    public void saveErrors(String filepath) {
+        try (CSVWriter writer =
+                     new CSVWriter(new FileWriter(filepath),
+                             CSVWriter.DEFAULT_SEPARATOR,
+                             CSVWriter.NO_QUOTE_CHARACTER,
+                             CSVWriter.NO_ESCAPE_CHARACTER,
+                             CSVWriter.DEFAULT_LINE_END)) {
             for (ValidationError error : errors) {
-                writer.write(error.toString());
-                writer.newLine();
+                String[] record = {
+                        "Error:"+error.getModel()+", Line:"+error.getLine()+", message:"+error.getMessage(),
+                };
+                writer.writeNext(record);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
