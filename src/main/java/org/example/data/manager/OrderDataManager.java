@@ -4,11 +4,13 @@ import com.opencsv.exceptions.CsvException;
 import org.example.model.Order;
 import org.example.variable.common.CSVColumn;
 import org.example.validator.OrderValidator;
+import org.example.variable.common.OperationMode;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class OrderDataManager extends BaseDataManager<Order> {
@@ -43,10 +45,21 @@ public class OrderDataManager extends BaseDataManager<Order> {
     }
 
     @Override
-    public void loadData(String filePath) throws IOException, CsvException {
+    public List<Order> processData(String filePath, OperationMode mode) throws IOException, CsvException {
         setValidator(new OrderValidator(getData()));
-        super.loadData(filePath);
+        return super.processData(filePath, mode);
     }
+
+    @Override
+    protected String getUpdateFieldName() {
+        return "";
+    }
+
+    @Override
+    protected String getItemValue(Order item, String fieldName) {
+        return "";
+    }
+
 
     @Override
     protected String getModelName() {

@@ -4,8 +4,10 @@ import com.opencsv.exceptions.CsvException;
 import org.example.model.Customer;
 import org.example.variable.common.CSVColumn;
 import org.example.validator.CustomerValidator;
+import org.example.variable.common.OperationMode;
 
 import java.io.IOException;
+import java.util.List;
 
 public class CustomerDataManager extends BaseDataManager<Customer> {
     public CustomerDataManager() {
@@ -17,9 +19,19 @@ public class CustomerDataManager extends BaseDataManager<Customer> {
                 null);
     }
     @Override
-    public void loadData(String filePath) throws IOException, CsvException {
+    public List<Customer> processData(String filePath, OperationMode mode) throws IOException, CsvException {
         setValidator(new CustomerValidator(getData()));
-        super.loadData(filePath);
+        return super.processData(filePath,mode);
+    }
+
+    @Override
+    protected String getUpdateFieldName() {
+        return "";
+    }
+
+    @Override
+    protected String getItemValue(Customer item, String fieldName) {
+        return "";
     }
 
     @Override

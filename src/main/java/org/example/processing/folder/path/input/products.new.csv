@@ -1,8 +1,3 @@
 Id,Name,Price,StockAvailable
-8,Product_8,564.48,-241
-9,Product_9,879.19,567
-10,Product_10,578.76,854
-11,Product_11,355.94,260
-12,Product_12,132.11,521
-13,Product_13,826.26,271
-14,Product_14,435.89,777
+1,Product_8,564.48,241
+4,Product_9,879.19,567

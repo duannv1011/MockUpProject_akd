@@ -1,23 +1,37 @@
 package org.example.service;
 
+import com.opencsv.exceptions.CsvException;
+import lombok.Getter;
+import org.example.data.manager.CustomerDataManager;
 import org.example.model.Customer;
-import org.example.repository.CustomerRepository;
-import org.example.variable.common.CSVFilePath;
+import org.example.model.Product;
+import org.example.variable.common.OperationMode;
 
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CustomerService {
-    private final CustomerRepository customerRepository;
+    @Getter
+    public final static List<Customer> customers = new ArrayList<>();
+    private final CustomerDataManager customerDataManager ;
 
-    public CustomerService(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
+    public CustomerService(CustomerDataManager customerDataManager) {
+        this.customerDataManager = customerDataManager;
+        customerDataManager.clearModel();
     }
-
-    public List<Customer> loadCustomers() {
-        return customerRepository.loadCustomers(CSVFilePath.CUSTOMER_INPUT_PATH.getFilePath());
+    public List<Customer> loadCustomers(String filePath) {
+        try {
+            return customerDataManager.processData(filePath, OperationMode.LOAD);
+        } catch (IOException | CsvException e) {
+            throw new RuntimeException(e);
+        }
     }
-
-    public void saveCustomer() {
-        customerRepository.savetoFile(CSVFilePath.CUSTOMER_OUTPUT_PATH.getFilePath());
+    public List<Customer> getData() {
+        return customers;
+    }
+    public void storedData(List<Customer> data) {
+        customers.addAll(data);
     }
 }

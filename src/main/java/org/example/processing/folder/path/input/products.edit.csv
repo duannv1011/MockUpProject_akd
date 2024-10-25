@@ -1,5 +1,6 @@
 Id,Name,Price,StockAvailable
-1,Product_01,1.1,1
-2,Product_02,2.2,2
+1,Product_01,15.1,1
+2,Product_02,20.2,2
 3,Product_03,3.3,3
 4,Product_04,4.4,4
+5,Product_05,5.5,5

@@ -1,7 +1,4 @@
 Id,Name,Price,StockAvailable
-2,Product_2,879.19,567
-3,Product_3,578.76,854
-4,Product_4,355.94,260
-5,Product_5,132.11,521
-6,Product_6,826.26,271
-7,Product_7,435.89,777
+1,Product_01,1.1,1
+2,Product_02,2.2,2
+4,Product_04,4.4,4

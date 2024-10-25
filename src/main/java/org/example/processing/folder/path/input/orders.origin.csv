@@ -4998,3 +4998,19 @@ ORD0004996,CUS4456,P0604:46;P0594:26;P0713:48;P0709:4;P0214:50,2024-07-25T23:16:
 ORD0004997,CUS3724,P0116:35;P0175:49;P0713:45,2024-09-02T13:09:48.564572+07:07
 ORD0004998,CUS4121,P0055:2;P0592:42;P0831:25;P0332:30;P0384:19,2024-10-02T03:08:54.219918+07:07
 ORD0004999,CUS0266,P0686:26,2024-05-30T14:43:38.107250+07:07
+Error:Error:products.origin.csv", Line: 2", Messages: Cannot invoke java.util.List.add(Object) because this.currentData is null
+Error:Error:products.origin.csv", Line: 3", Messages: Cannot invoke java.util.List.add(Object) because this.currentData is null
+Error:Error:products.origin.csv", Line: 4", Messages: Cannot invoke java.util.List.add(Object) because this.currentData is null
+Error:Error:products.origin.csv", Line: 5", Messages: Cannot invoke java.util.List.add(Object) because this.currentData is null
+Error:Error:products.origin.csv", Line: 2", Messages: Cannot invoke java.util.List.add(Object) because this.currentData is null
+Error:Error:products.origin.csv", Line: 3", Messages: Cannot invoke java.util.List.add(Object) because this.currentData is null
+Error:Error:products.origin.csv", Line: 4", Messages: Cannot invoke java.util.List.add(Object) because this.currentData is null
+Error:Error:products.origin.csv", Line: 5", Messages: Cannot invoke java.util.List.add(Object) because this.currentData is null
+Error:Error:products.origin.csv", Line: 2", Messages: For input string: 41a
+Error:Error:products.origin.csv", Line: 2", Messages: stockAvailable must be greater than or equal to 0
+Error:Error:products.origin.csv", Line: 2", Messages: stockAvailable must be greater than or equal to 0
+Error:Error:products.origin.csv", Line: 2", Messages: stockAvailable must be greater than or equal to 0
+Error:Error:products.origin.csv", Line: 2", Messages: stockAvailable must be greater than or equal to 0
+Error:Error:products.origin.csv", Line: 2", Messages: stockAvailable must be greater than or equal to 0
+Error:Error:products.origin.csv", Line: 2", Messages: stockAvailable must be greater than or equal to 0
+Error:Error:products.origin.csv", Line: 2", Messages: stockAvailable must be greater than or equal to 0

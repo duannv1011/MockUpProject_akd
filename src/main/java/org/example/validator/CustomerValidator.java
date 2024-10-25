@@ -3,6 +3,7 @@ package org.example.validator;
 import org.apache.commons.lang3.ObjectUtils;
 import org.example.model.Customer;
 import org.example.variable.common.CSVColumn;
+import org.example.variable.common.OperationMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class CustomerValidator extends BaseValidator<Customer> {
 
 
     @Override
-    public ValidationError validate(Customer item, String line) {
+    public ValidationError validateToAdd(Customer item, String line) {
         List<String> messages = new ArrayList<>();
         messages.addAll(validateId(item.getId(), CSVColumn.CustomerColumn.ID.getDescription(), true));
         messages.add(isEmpty(item.getName(), CSVColumn.CustomerColumn.NAME.getDescription()));
@@ -29,6 +30,16 @@ public class CustomerValidator extends BaseValidator<Customer> {
         if (!messages.isEmpty()) {
             return new ValidationError(MODEL, line, messages.toArray(new String[0]));
         }
+        return null;
+    }
+
+    @Override
+    public ValidationError validateToUpdate(Customer item, String line) {
+        return null;
+    }
+
+    @Override
+    public ValidationError validateToDelete(Customer item, String line) {
         return null;
     }
 }

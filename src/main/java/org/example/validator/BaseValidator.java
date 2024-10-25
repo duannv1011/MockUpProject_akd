@@ -1,6 +1,9 @@
 package org.example.validator;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.example.until.FilePathContext;
+import org.example.variable.common.OperationMode;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -27,7 +30,6 @@ public abstract class BaseValidator<T> implements Validator<T> {
         }
         return messages;
     }
-
     protected String validateNumeric(Number value, String fieldName) {
         if (value == null || value.doubleValue() < 0) {
             return fieldName + " must be greater than or equal to 0";
@@ -43,7 +45,7 @@ public abstract class BaseValidator<T> implements Validator<T> {
     }
     protected String matchingRegex(String value, Pattern pattern, String fieldName) {
         if (value == null || !pattern.matcher(value).matches()) {
-            return fieldName + "is invalid format" ;
+            return fieldName + " is invalid format" ;
         }
         return null;
     }
@@ -51,7 +53,7 @@ public abstract class BaseValidator<T> implements Validator<T> {
         List<String> messages = new ArrayList<>();
 
         if (value == null || !pattern.matcher(value).matches()) {
-            messages.add( fieldName + "is invalid format");
+            messages.add( fieldName + " is invalid format");
         }
         if (isUniqueCheck) {
             messages.add(isExist(value, fieldName));
@@ -59,15 +61,20 @@ public abstract class BaseValidator<T> implements Validator<T> {
 
         return messages;
     }
-
-
     protected String isExist(String value, String fieldName) {
+
         if (existingItems.stream().anyMatch(item -> getItem(item, fieldName).equals(value))) {
             return fieldName + " already exists: " + value;
         }
         return null;
     }
+    protected String isNotExist(String value, String fieldName) {
 
+        if (existingItems.stream().noneMatch(item -> getItem(item, fieldName).equals(value))) {
+            return fieldName + " does not exist with value" + value;
+        }
+        return null;
+    }
     protected String getItem(T item, String fieldName) {
         try {
             Field field = item.getClass().getDeclaredField(fieldName);
@@ -78,12 +85,5 @@ public abstract class BaseValidator<T> implements Validator<T> {
             e.printStackTrace();
             return null;
         }
-    }
-
-    protected ValidationError addAllMessage(String line, String[] messages) {
-        ValidationError error = new ValidationError();
-        error.setLine(line);
-        error.setMessage(messages);
-        return error;
     }
 }
