@@ -1,6 +1,7 @@
 package org.example.data.manager;
 
 import com.opencsv.exceptions.CsvException;
+import lombok.Setter;
 import org.example.model.Customer;
 import org.example.variable.common.CSVColumn;
 import org.example.validator.CustomerValidator;
@@ -8,8 +9,11 @@ import org.example.variable.common.OperationMode;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
+@Setter
 public class CustomerDataManager extends BaseDataManager<Customer> {
+    private String fieldNameToUpdate;
     public CustomerDataManager() {
         super(data -> new Customer(
                         data[CSVColumn.CustomerColumn.ID.getIndex()],
@@ -26,12 +30,18 @@ public class CustomerDataManager extends BaseDataManager<Customer> {
 
     @Override
     protected String getUpdateFieldName() {
-        return "";
+        return Objects.requireNonNullElse(fieldNameToUpdate, "phoneNumber");
     }
 
     @Override
     protected String getItemValue(Customer item, String fieldName) {
-        return "";
+        return switch (fieldName) {
+            case "id" -> item.getId();
+            case "name" -> item.getName();
+            case "email" -> item.getEmail();
+            case "phoneNumber" -> item.getPhoneNumber();
+            default -> null;
+        };
     }
 
     @Override

@@ -5,7 +5,6 @@ import com.opencsv.exceptions.CsvException;
 import lombok.Getter;
 import org.example.data.manager.ProductDataManager;
 import org.example.model.Product;
-import org.example.validator.ValidationError;
 import org.example.variable.common.OperationMode;
 
 import java.io.IOException;
@@ -26,11 +25,18 @@ public class ProductService {
     public void loadProducts(String filePath) {
         try {
             productDataManager.processData(filePath, OperationMode.LOAD);
+            storedData();
         } catch (IOException | CsvException e) {
             ErrorService.logError(filePath, e.getMessage());
         }
     }
-
+    public void readKeyFromFIle(String filePath) {
+        try {
+            productDataManager.processData(filePath, OperationMode.READKEY);
+        } catch (IOException | CsvException e) {
+            ErrorService.logError(filePath, e.getMessage());
+        }
+    }
     public void loadForUpdate(String filePath) {
         try {
             productDataManager.processData(filePath, OperationMode.UPDATE);
@@ -56,14 +62,13 @@ public class ProductService {
         }
     }
 
-    public List<Product> getData() {
-        return products;
-    }
-
     public void storedData() {
         if (!products.isEmpty()) {
             products.clear();
         }
         products.addAll(productDataManager.getData());
+    }
+    public List<Product> getData() {
+        return products;
     }
 }

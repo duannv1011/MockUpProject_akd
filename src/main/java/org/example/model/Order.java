@@ -9,22 +9,7 @@ import java.util.*;
 public class Order {
     private String id;
     private String customerId;
-    private Map<String, Integer> productQuantities = new HashMap<>();
+    private Map<String, Integer> productQuantities = new LinkedHashMap<>();
     private String orderDate;
-    private double totalPrice;
-
-    public void calculateTotal(List<Product> products) {
-        totalPrice = productQuantities.entrySet().stream()
-                .mapToDouble(entry -> {
-                    String productId = entry.getKey();
-                    int quantity = entry.getValue();
-                    return products.stream()
-                            .filter(product -> product.getId().equals(productId))
-                            .findFirst()
-                            .map(product -> product.getPrice() * quantity)
-                            .orElse(0.0);
-                })
-                .sum();
-    }
 
 }

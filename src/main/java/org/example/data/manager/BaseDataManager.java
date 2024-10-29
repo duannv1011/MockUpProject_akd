@@ -6,7 +6,6 @@ import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 import lombok.Getter;
 import lombok.Setter;
-import org.example.service.ErrorService;
 import org.example.until.ErrorFileWriter;
 import org.example.until.FilePathContext;
 import org.example.validator.ValidationError;
@@ -18,9 +17,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 public abstract class BaseDataManager<T> {
@@ -35,6 +32,8 @@ public abstract class BaseDataManager<T> {
     @Getter
     @Setter
     private String file;
+    @Getter
+    private List<String> keys = new ArrayList<>();
 
 
     public BaseDataManager(Function<String[], T> mapper, Validator<T> validator) {
@@ -74,6 +73,40 @@ public abstract class BaseDataManager<T> {
         return data;
     }
 
+    public List<String> readKeys(String filePath) throws IOException, CsvException {
+        Set<String> uniqueKeys = new HashSet<>();
+        String fullPath = Paths.get(filePath).toString();
+
+        try (CSVReader reader = new CSVReader(new FileReader(fullPath))) {
+            String[] nextLine;
+            boolean isFirstLine = true;
+            int lineNumber = 0;
+
+            while ((nextLine = reader.readNext()) != null) {
+                lineNumber++;
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+                try {
+                    String key = nextLine[0];
+                    if (uniqueKeys.add(key)) { // Chỉ thêm key nếu chưa tồn tại trong uniqueKeys
+                        continue;
+                    }
+                } catch (Exception e) {
+                    ValidationError error = new ValidationError(getPathModelName(filePath), String.valueOf(lineNumber), new String[]{e.getMessage()});
+                    errors.add(error);
+                    writerError(error);
+                }
+            }
+        } catch (Exception e) {
+            ValidationError error = new ValidationError(getPathModelName(filePath), "file", new String[]{e.getMessage()});
+            errors.add(error);
+            writerError(error);
+        }
+        return new ArrayList<>(uniqueKeys);
+    }
+
 
     private void processLine(String[] nextLine, int lineNumber, String filePath, OperationMode mode) {
         try {
@@ -90,6 +123,15 @@ public abstract class BaseDataManager<T> {
                     String deleteKey = nextLine[0];
                     deleteItemFromList(deleteKey, filePath, lineNumber);
                     break;
+                case REPLACE:
+                    T replacedItem = mapper.apply(nextLine);
+                    validateItemToReplace(replacedItem, lineNumber);
+                    break;
+                case READKEY:
+                    String value = nextLine[0];
+                    validateToReadKey(value, lineNumber);
+                    break;
+
             }
 
         } catch (Exception e) {
@@ -99,6 +141,27 @@ public abstract class BaseDataManager<T> {
         }
     }
 
+    private void validateToReadKey(String value, int lineNumber) {
+        ValidationError validationErrors = validator.validateToReadKey(value, String.valueOf(lineNumber));
+
+        if (validationErrors != null) {
+            errors.add(validationErrors);
+            writerError(validationErrors);
+        } else {
+           keys.add(value);
+        }
+    }
+
+    private void validateItemToReplace(T item, int lineNumber) {
+        ValidationError validationErrors = validator.validateToReplace(item, String.valueOf(lineNumber));
+
+        if (validationErrors != null) {
+            errors.add(validationErrors);
+            writerError(validationErrors);
+        } else {
+            replaceOrAddItemInList(item, getUpdateFieldName());
+        }
+    }
 
     public void saveData(String filePath, List<T> dataSave) throws IOException {
         clearFile(filePath);
@@ -147,16 +210,45 @@ public abstract class BaseDataManager<T> {
         }
     }
 
+    // private validate for each model validation, it the same update and load
+    private void validateItemToDelete(T item, int lineNumber) {
+        ValidationError validationErrors = validator.validateToDelete(item, String.valueOf(lineNumber));
+
+        if (validationErrors != null) {
+            errors.add(validationErrors);
+            writerError(validationErrors);
+        } else {
+            String deleteValue = getItemValue(item, getUpdateFieldName());
+            data.removeIf(ite -> getItemValue(ite, getUpdateFieldName()).equals(deleteValue));
+        }
+    }
+
     private void deleteItemFromList(String deleteKey, String filePath, int lineNumber) {
+        if (!validData(deleteKey, filePath, lineNumber)) {
+            return;
+        }
         boolean isDeleted = data.removeIf(item -> getItemValue(item, getUpdateFieldName()).equals(deleteKey));
 
         if (!isDeleted) {
             ValidationError error = new ValidationError(getPathModelName(filePath), String.valueOf(lineNumber),
-                    new String[]{"Item with key " + deleteKey + " not found for deletion."});
+                    new String[]{"Item with " + getUpdateFieldName() + ":" + deleteKey + " not found for deletion."});
             errors.add(error);
             writerError(error);
-        }else{
-            System.out.println(deleteKey);        }
+        } else {
+            System.out.println(deleteKey);
+        }
+    }
+
+
+    private boolean validData(String deleteKey, String filePath, int lineNumber) {
+        if (deleteKey == null || deleteKey.trim().isEmpty()) {
+            ValidationError error = new ValidationError(getPathModelName(filePath), String.valueOf(lineNumber),
+                    new String[]{getUpdateFieldName() + " cannot be null or empty."});
+            errors.add(error);
+            writerError(error);
+            return false;
+        }
+        return true;
     }
 
     private void updateItemInList(T updatedItem, String fieldName) {
@@ -169,6 +261,21 @@ public abstract class BaseDataManager<T> {
         if (existingItemOptional.isPresent()) {
             int index = data.indexOf(existingItemOptional.get());
             data.set(index, updatedItem);
+        }
+    }
+
+    private void replaceOrAddItemInList(T updatedItem, String fieldName) {
+        String updatedValue = getItemValue(updatedItem, fieldName);
+
+        Optional<T> existingItemOptional = data.stream()
+                .filter(existingItem -> getItemValue(existingItem, fieldName).equals(updatedValue))
+                .findFirst();
+
+        if (existingItemOptional.isPresent()) {
+            int index = data.indexOf(existingItemOptional.get());
+            data.set(index, updatedItem);
+        } else {
+            data.add(updatedItem);
         }
     }
 

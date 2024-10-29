@@ -5,17 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 import org.example.model.Product;
 import org.example.validator.ProductValidator;
-import org.example.validator.ValidationError;
-import org.example.validator.Validator;
 import org.example.variable.common.CSVColumn;
 import org.example.variable.common.OperationMode;
 
 import java.io.IOException;
 import java.util.List;
 
+@Setter
 @Getter
 public class ProductDataManager extends BaseDataManager<Product> {
-    @Setter
     private String fieldNameToUpdate;
     public ProductDataManager() {
         super(ProductDataManager::createProduct,

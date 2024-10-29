@@ -1,5 +1,5 @@
 package org.example.variable.common;
 
 public enum OperationMode {
-    LOAD,UPDATE,DELETE
+    LOAD,UPDATE,DELETE,REPLACE,READKEY
 }

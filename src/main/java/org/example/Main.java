@@ -2,9 +2,17 @@ package org.example;
 
 
 
+import org.example.data.manager.CustomerDataManager;
+import org.example.data.manager.OrderDataManager;
 import org.example.data.manager.ProductDataManager;
 
 
+import org.example.model.Customer;
+import org.example.model.Order;
+import org.example.model.Product;
+import org.example.service.CommonService;
+import org.example.service.CustomerService;
+import org.example.service.OrderService;
 import org.example.service.ProductService;
 import org.example.variable.common.CSVFilePath;
 
@@ -16,8 +24,28 @@ import java.io.IOException;
 public class Main {
     public ProductDataManager productDataManage;
     public static void main(String[] args) throws IOException {
-            Main main = new Main();
-            main.run(args);
+//            Main main = new Main();
+//            main.run(args);
+        CustomerDataManager customerDataManager = new CustomerDataManager();
+        CustomerService customerService = new CustomerService(customerDataManager);
+        ProductDataManager productDataManager = new ProductDataManager();
+        ProductService productService = new ProductService(productDataManager);
+        OrderDataManager orderDataManager = new OrderDataManager();
+        OrderService orderService =new OrderService(orderDataManager);
+        CommonService commonService=new CommonService(productDataManager,orderDataManager);
+        customerService.loadCustomers(CSVFilePath.CUSTOMER_INPUT_PATH.getFilePath());
+
+
+        productService.loadProducts(CSVFilePath.PRODUCT_INPUT_PATH.getFilePath());
+
+
+        orderService.loadOrders(CSVFilePath.ORDER_INPUT_PATH.getFilePath());
+        productService.readKeyFromFIle(CSVFilePath.PRODUCT_IDS_INPUT_PATH.getFilePath());
+
+        commonService.getAndSaveOrderedProducts(CSVFilePath.ORDER_OUTPUT_PATH.getFilePath());
+
+
+
 
     }
 

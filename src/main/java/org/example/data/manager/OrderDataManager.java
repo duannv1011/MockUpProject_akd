@@ -16,20 +16,18 @@ import java.util.Map;
 public class OrderDataManager extends BaseDataManager<Order> {
 
     public OrderDataManager( ) {
-        super(data -> {
-            Order order = new Order();
-            order.setId(data[CSVColumn.OrderColumn.ID.getIndex()]);
-            order.setCustomerId(data[CSVColumn.OrderColumn
-                    .CUSTOMER_ID.getIndex()]);
-            Map<String, Integer> quantities = getStringIntegerMap(data);
-            order.setProductQuantities(quantities);
-
-            order.setOrderDate(LocalDateTime.parse(data[CSVColumn.OrderColumn.ORDER_DATE.getIndex()],
-                    DateTimeFormatter.ISO_DATE_TIME).toString());
-            return order;
-        }, null);
+        super(OrderDataManager::mapToOrder, null);
     }
-
+    private static Order mapToOrder(String[] data){
+        Order order = new Order();
+        order.setId(data[CSVColumn.OrderColumn.ID.getIndex()]);
+        order.setCustomerId(data[CSVColumn.OrderColumn
+                .CUSTOMER_ID.getIndex()]);
+        Map<String, Integer> quantities = getStringIntegerMap(data);
+        order.setProductQuantities(quantities);
+        order.setOrderDate(data[CSVColumn.OrderColumn.ORDER_DATE.getIndex()]);
+        return order;
+    }
     private static Map<String, Integer> getStringIntegerMap(String[] data) {
         String[] productQuantities = data[CSVColumn.OrderColumn.PRODUCT_QUANTITIES.getIndex()].split(";");
         Map<String, Integer> quantities = new HashMap<>();
@@ -52,12 +50,17 @@ public class OrderDataManager extends BaseDataManager<Order> {
 
     @Override
     protected String getUpdateFieldName() {
-        return "";
+        return "id";
     }
 
     @Override
     protected String getItemValue(Order item, String fieldName) {
-        return "";
+        return switch (fieldName) {
+            case "id" -> item.getId();
+            case "customerId" -> item.getCustomerId();
+            case "orderDate" -> item.getOrderDate();
+            default -> null;
+        };
     }
 
 
@@ -78,7 +81,6 @@ public class OrderDataManager extends BaseDataManager<Order> {
                 item.getCustomerId(),
                 String.valueOf(item.getProductQuantities()),
                 String.valueOf(item.getOrderDate()),
-                String.valueOf(item.getTotalPrice())
 
         };
     }

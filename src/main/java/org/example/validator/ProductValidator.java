@@ -32,6 +32,7 @@ public class ProductValidator extends BaseValidator<Product> {
         return null;
     }
 
+
     @Override
     public ValidationError validateToUpdate(Product item, String line) {
         List<String> messages = new ArrayList<>();
@@ -49,9 +50,12 @@ public class ProductValidator extends BaseValidator<Product> {
         return null;
     }
 
+
+
     @Override
     public ValidationError validateToDelete(Product item, String line) {
         List<String> messages = new ArrayList<>();
+        messages.add(isEmpty(item.getName(), CSVColumn.ProductColumn.ID.getDescription()));
         messages.add(isNotExist(item.getId(), CSVColumn.ProductColumn.ID.getDescription()));
         messages = messages.stream()
                 .filter(ObjectUtils::isNotEmpty)
@@ -60,6 +64,24 @@ public class ProductValidator extends BaseValidator<Product> {
             return new ValidationError(getFilePath(), line, messages.toArray(new String[0]));
         }
 
+        return null;
+    }
+
+    @Override
+    public ValidationError validateToReplace(Product item, String s) {
+        return null;
+    }
+
+    @Override
+    public ValidationError validateToReadKey(String key, String line) {
+        List<String> messages = new ArrayList<>();
+        messages.add(isEmpty(key, CSVColumn.ProductColumn.ID.getDescription()));
+        messages.add(isNotExist(key, CSVColumn.ProductColumn.ID.getDescription()));
+
+        messages.removeIf(ObjectUtils::isEmpty);
+        if (!messages.isEmpty()) {
+            return new ValidationError(getFilePath(), line, messages.toArray(new String[0]));
+        }
         return null;
     }
 }

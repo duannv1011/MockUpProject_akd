@@ -8,6 +8,7 @@ import org.example.variable.common.OperationMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class CustomerValidator extends BaseValidator<Customer> {
     private final String MODEL = "Customer";
@@ -28,18 +29,68 @@ public class CustomerValidator extends BaseValidator<Customer> {
         messages.addAll(matchingRegex(item.getPhoneNumber(), PHONE_PATTERN, CSVColumn.CustomerColumn.PHONE.getDescription(), true));
         messages.removeIf(ObjectUtils::isEmpty);
         if (!messages.isEmpty()) {
-            return new ValidationError(MODEL, line, messages.toArray(new String[0]));
+            return new ValidationError(getFilePath(), line, messages.toArray(new String[0]));
+        }
+        return null;
+    }
+
+
+    @Override
+    public ValidationError validateToReplace(Customer item, String line) {
+        List<String> messages = new ArrayList<>();
+        messages.add(validateExistForUpdate(item.getId(), item.getPhoneNumber(),
+                CSVColumn.CustomerColumn.ID.getDescription(),
+                CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.add(isEmpty(item.getName(), CSVColumn.CustomerColumn.NAME.getDescription()));
+        messages.add(validateExistForUpdate(item.getEmail(), item.getPhoneNumber(),
+                CSVColumn.CustomerColumn.EMAIL.getDescription(),
+                CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.add(matchingRegex(item.getPhoneNumber(), PHONE_PATTERN, CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.removeIf(ObjectUtils::isEmpty);
+        if (!messages.isEmpty()) {
+            return new ValidationError(getFilePath(), line, messages.toArray(new String[0]));
+        }
+        return null;
+    }
+
+    @Override
+    public ValidationError validateToReadKey(String key, String line) {
+        List<String> messages = new ArrayList<>();
+        messages.addAll(validateId(key, CSVColumn.CustomerColumn.ID.getDescription(), true));
+        messages.removeIf(ObjectUtils::isEmpty);
+        if (!messages.isEmpty()) {
+            return new ValidationError(getFilePath(), line, messages.toArray(new String[0]));
         }
         return null;
     }
 
     @Override
     public ValidationError validateToUpdate(Customer item, String line) {
+        List<String> messages = new ArrayList<>();
+        messages.add(validateExistForUpdate(item.getId(), item.getPhoneNumber(),
+                CSVColumn.CustomerColumn.ID.getDescription(),
+                CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.add(isEmpty(item.getName(), CSVColumn.CustomerColumn.NAME.getDescription()));
+        messages.add(isNotExist(item.getPhoneNumber(), CSVColumn.CustomerColumn.EMAIL.getDescription()));
+        messages.add(isNotExist(item.getPhoneNumber(), CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.removeIf(ObjectUtils::isEmpty);
+        if (!messages.isEmpty()) {
+            return new ValidationError(getFilePath(), line, messages.toArray(new String[0]));
+        }
         return null;
     }
 
+
+
     @Override
     public ValidationError validateToDelete(Customer item, String line) {
+        List<String> messages = new ArrayList<>();
+        messages.add(isEmpty(item.getPhoneNumber(), CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.add(isNotExist(item.getPhoneNumber(), CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.removeIf(ObjectUtils::isEmpty);
+        if (!messages.isEmpty()) {
+            return new ValidationError(getFilePath(), line, messages.toArray(new String[0]));
+        }
         return null;
     }
 }

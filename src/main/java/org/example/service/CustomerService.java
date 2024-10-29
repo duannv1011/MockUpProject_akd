@@ -4,7 +4,6 @@ import com.opencsv.exceptions.CsvException;
 import lombok.Getter;
 import org.example.data.manager.CustomerDataManager;
 import org.example.model.Customer;
-import org.example.model.Product;
 import org.example.variable.common.OperationMode;
 
 
@@ -15,23 +14,63 @@ import java.util.List;
 public class CustomerService {
     @Getter
     public final static List<Customer> customers = new ArrayList<>();
-    private final CustomerDataManager customerDataManager ;
+    private final CustomerDataManager customerDataManager;
 
     public CustomerService(CustomerDataManager customerDataManager) {
         this.customerDataManager = customerDataManager;
         customerDataManager.clearModel();
     }
-    public List<Customer> loadCustomers(String filePath) {
+
+    public void loadCustomers(String filePath) {
         try {
-            return customerDataManager.processData(filePath, OperationMode.LOAD);
+            customerDataManager.processData(filePath, OperationMode.LOAD);
+            storedData();
         } catch (IOException | CsvException e) {
-            throw new RuntimeException(e);
+            ErrorService.logError(filePath, e.getMessage());
         }
     }
+    public void loadForAdd(String filePath) {
+        try {
+            customerDataManager.processData(filePath, OperationMode.REPLACE);
+        } catch (IOException | CsvException e) {
+            ErrorService.logError(filePath, e.getMessage());
+        }
+    }
+
+    public void loadForUpdate(String filePath) {
+        try {
+            customerDataManager.processData(filePath, OperationMode.UPDATE);
+        } catch (IOException | CsvException e) {
+            ErrorService.logError(filePath, e.getMessage());
+        }
+    }
+
+    public void loadForDelete(String filePath) {
+        try {
+            customerDataManager.processData(filePath, OperationMode.DELETE);
+        } catch (IOException | CsvException e) {
+            ErrorService.logError(filePath, e.getMessage());
+        }
+    }
+
+    public void saveToFile(String filePath) {
+        try {
+            storedData();
+            customerDataManager.saveData(filePath, getCustomers());
+        } catch (IOException e) {
+            ErrorService.logError(filePath, e.getMessage());
+        }
+    }
+
+    public void storedData() {
+        if (!customers.isEmpty()) {
+            customers.clear();
+        }
+        customers.addAll(customerDataManager.getData());
+    }
+
     public List<Customer> getData() {
         return customers;
     }
-    public void storedData(List<Customer> data) {
-        customers.addAll(data);
-    }
+
 }
