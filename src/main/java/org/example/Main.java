@@ -19,6 +19,7 @@ public class Main {
 //        }
 //        String functionCode = args[0];
 //        String folderPath = args[1];
+        //hello
         run("5.1", "C:\\Users\\Admin\\IdeaProjects\\MockUpProject\\processing_folder_path");
     }
 
