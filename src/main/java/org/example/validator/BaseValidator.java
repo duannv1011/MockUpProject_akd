@@ -97,7 +97,7 @@ public abstract class BaseValidator<T> implements Validator<T> {
 
     protected String isNotExist(String value, String fieldName) {
 
-        if (existingItems.stream().noneMatch(item -> getItem(item, fieldName).equals(value))) {
+        if (existingItems.stream().noneMatch(item -> getItem(item, fieldName).equals(value))&&!value.isEmpty()) {
             return fieldName + " does not exist with value: " + value;
         }
         return null;

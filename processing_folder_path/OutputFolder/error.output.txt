@@ -1,0 +1,2 @@
+Timestamp: 2024-11-01T10:28:48.582035800, Error: productIds.search.csv, Line: 3, Messages: id cannot be empty
+Timestamp: 2024-11-01T10:28:48.589644900, Error: productIds.search.csv, Line: 4, Messages: id does not exist with value: ppppp

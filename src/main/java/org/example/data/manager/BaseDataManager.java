@@ -31,7 +31,10 @@ public abstract class BaseDataManager<T> {
     private final List<ValidationError> errors = new ArrayList<>();
     @Getter
     @Setter
-    private String file;
+    private static String file;
+    @Getter
+    @Setter
+    private static String line;
     @Getter
     private List<String> keys = new ArrayList<>();
 
@@ -52,6 +55,7 @@ public abstract class BaseDataManager<T> {
 
             while ((nextLine = reader.readNext()) != null) {
                 lineNumber++;
+                setLine(String.valueOf(lineNumber));
                 if (isFirstLine) {
                     isFirstLine = false;
                     continue;
@@ -111,13 +115,12 @@ public abstract class BaseDataManager<T> {
     private void processLine(String[] nextLine, int lineNumber, String filePath, OperationMode mode) {
         try {
             switch (mode) {
-                case LOAD:
-                    T item = mapper.apply(nextLine);
-                    validateItemToAdd(item, lineNumber);
-                    break;
                 case UPDATE:
                     T updatedItem = mapper.apply(nextLine);
-                    validateItemToUpdate(updatedItem, lineNumber);
+                    if (updatedItem != null) {
+                        validateItemToUpdate(updatedItem, lineNumber);
+
+                    }
                     break;
                 case DELETE:
                     String deleteKey = nextLine[0];
@@ -125,11 +128,21 @@ public abstract class BaseDataManager<T> {
                     break;
                 case REPLACE:
                     T replacedItem = mapper.apply(nextLine);
-                    validateItemToReplace(replacedItem, lineNumber);
+                    if (replacedItem != null) {
+                        validateItemToReplace(replacedItem, lineNumber);
+
+                    }
                     break;
                 case READKEY:
                     String value = nextLine[0];
                     validateToReadKey(value, lineNumber);
+                    break;
+                case LOAD:
+                default:
+                    T Item = mapper.apply(nextLine);
+                   if (Item !=null){
+                       validateItemToAdd(Item, lineNumber);
+                   }
                     break;
 
             }
@@ -143,7 +156,6 @@ public abstract class BaseDataManager<T> {
 
     private void validateToReadKey(String value, int lineNumber) {
         ValidationError validationErrors = validator.validateToReadKey(value, String.valueOf(lineNumber));
-
         if (validationErrors != null) {
             errors.add(validationErrors);
             writerError(validationErrors);
@@ -190,7 +202,6 @@ public abstract class BaseDataManager<T> {
 
     private void validateItemToAdd(T item, int lineNumber) {
         ValidationError validationErrors = validator.validateToAdd(item, String.valueOf(lineNumber));
-
         if (validationErrors != null) {
             errors.add(validationErrors);
             writerError(validationErrors);
@@ -234,8 +245,6 @@ public abstract class BaseDataManager<T> {
                     new String[]{"Item with " + getUpdateFieldName() + ":" + deleteKey + " not found for deletion."});
             errors.add(error);
             writerError(error);
-        } else {
-            System.out.println(deleteKey);
         }
     }
 
@@ -283,7 +292,7 @@ public abstract class BaseDataManager<T> {
         data.clear();
     }
 
-    protected String getPathModelName(String filePath) {
+    protected  String getPathModelName(String filePath) {
         File file = new File(filePath);
         return file.exists() ? file.getName() : getModelName();
     }

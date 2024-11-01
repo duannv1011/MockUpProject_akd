@@ -4,7 +4,7 @@ import com.opencsv.exceptions.CsvException;
 import lombok.Getter;
 import org.example.data.manager.OrderDataManager;
 import org.example.model.Order;
-import org.example.model.Product;
+import org.example.until.FilePaths;
 import org.example.variable.common.OperationMode;
 
 import java.io.IOException;
@@ -21,28 +21,40 @@ public class OrderService {
         dataManager.clearModel();
 
     }
-    public void loadOrders(String filePath) {
+    public void loadOrders() {
+        String filePath = FilePaths.getORDER_INPUT_PATH();
         try {
             dataManager.processData(filePath, OperationMode.LOAD);
         } catch (IOException | CsvException e) {
             ErrorService.logError(filePath, e.getMessage());
         }
     }
-    public void loadForUpdate(String filePath) {
+    public void loadForAdd() {
+        String filePath = FilePaths.getORDER_NEW_PATH();
+        try {
+            dataManager.processData(filePath, OperationMode.LOAD);
+        } catch (IOException | CsvException e) {
+            ErrorService.logError(filePath, e.getMessage());
+        }
+    }
+    public void loadForUpdate() {
+        String filePath= FilePaths.getORDER_UPDATE_PATH();
         try {
             dataManager.processData(filePath, OperationMode.UPDATE);
         } catch (IOException | CsvException e) {
             ErrorService.logError(filePath, e.getMessage());
         }
     }
-    public void loadForDelete(String filePath) {
+    public void loadForDelete() {
+        String filePath= FilePaths.getORDER_DELETE_PATH();
         try {
             dataManager.processData(filePath, OperationMode.DELETE);
         } catch (IOException | CsvException e) {
             ErrorService.logError(filePath, e.getMessage());
         }
     }
-    public void saveToFile(String filePath) {
+    public void saveToFile() {
+        String filePath= FilePaths.getORDER_OUTPUT_PATH();
         try {
             storedData();
             dataManager.saveData(filePath, getOrders());

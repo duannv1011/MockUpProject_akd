@@ -12,10 +12,7 @@ import org.example.variable.common.CSVColumn;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OrderValidator extends BaseValidator<Order> {
@@ -38,10 +35,14 @@ public class OrderValidator extends BaseValidator<Order> {
 
     private String validateProductQuantities(Map<String, Integer> productQuantities) {
         List<String> messages = new ArrayList<>();
+        Set<String> uniqueProductIds = new HashSet<>();
 
         for (Map.Entry<String, Integer> entry : productQuantities.entrySet()) {
             String productId = entry.getKey();
             int quantity = entry.getValue();
+            if (!uniqueProductIds.add(productId)) {
+                    messages.add("Duplicate Product ID: " + productId + " found in the product quantities.");
+            }
             boolean productExists = products.stream()
                     .anyMatch(product -> product.getId().equals(productId));
             if (!productExists) {
@@ -54,6 +55,7 @@ public class OrderValidator extends BaseValidator<Order> {
 
         return messages.isEmpty() ? null : String.join(", ", messages);
     }
+
 
     private String validateOrderDate(String orderDate, String fieldName) {
         try {
@@ -102,10 +104,10 @@ public class OrderValidator extends BaseValidator<Order> {
     @Override
     public ValidationError validateToUpdate(Order item, String line) {
         List<String> messages = new ArrayList<>();
-
         messages.add(validateExistForUpdate(item.getId(), item.getCustomerId()));
         messages.add(validateOrderDate(item.getOrderDate(), CSVColumn.OrderColumn.ORDER_DATE.getDescription()));
         messages.add(validateProductQuantities(item.getProductQuantities()));
+
         messages = messages.stream()
                 .filter(ObjectUtils::isNotEmpty)
                 .collect(Collectors.toList());
