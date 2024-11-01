@@ -5,6 +5,7 @@ import com.opencsv.exceptions.CsvException;
 import lombok.Getter;
 import org.example.data.manager.ProductDataManager;
 import org.example.model.Product;
+import org.example.until.FilePaths;
 import org.example.variable.common.OperationMode;
 
 import java.io.IOException;
@@ -22,7 +23,8 @@ public class ProductService {
         productDataManager.clearModel();
     }
 
-    public void loadProducts(String filePath) {
+    public void loadProducts() {
+        String filePath = FilePaths.getPRODUCT_INPUT_PATH();
         try {
             productDataManager.processData(filePath, OperationMode.LOAD);
             storedData();
@@ -30,14 +32,25 @@ public class ProductService {
             ErrorService.logError(filePath, e.getMessage());
         }
     }
-    public void readKeyFromFIle(String filePath) {
+    public void loadForAdd() {
+        String filePath = FilePaths.getPRODUCT_NEW_PATH();
+        try {
+            productDataManager.processData(filePath, OperationMode.LOAD);
+            storedData();
+        } catch (IOException | CsvException e) {
+            ErrorService.logError(filePath, e.getMessage());
+        }
+    }
+    public void readKeyFromFIle() {
+        String filePath = FilePaths.getPRODUCT_SEARCH_PATH();
         try {
             productDataManager.processData(filePath, OperationMode.READKEY);
         } catch (IOException | CsvException e) {
             ErrorService.logError(filePath, e.getMessage());
         }
     }
-    public void loadForUpdate(String filePath) {
+    public void loadForUpdate() {
+        String filePath = FilePaths.getPRODUCT_UPDATE_PATH();
         try {
             productDataManager.processData(filePath, OperationMode.UPDATE);
         } catch (IOException | CsvException e) {
@@ -45,7 +58,8 @@ public class ProductService {
         }
     }
 
-    public void loadForDelete(String filePath) {
+    public void loadForDelete() {
+        String filePath = FilePaths.getPRODUCT_DELETE_PATH();
         try {
             productDataManager.processData(filePath, OperationMode.DELETE);
         } catch (IOException | CsvException e) {
@@ -53,7 +67,8 @@ public class ProductService {
         }
     }
 
-    public void saveToFile(String filePath) {
+    public void saveToFile() {
+        String filePath = FilePaths.getPRODUCT_OUTPUT_PATH();
         try {
             storedData();
             productDataManager.saveData(filePath, getProducts());

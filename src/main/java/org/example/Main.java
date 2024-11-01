@@ -1,117 +1,175 @@
 package org.example;
 
-
-
-import org.example.data.manager.CustomerDataManager;
-import org.example.data.manager.OrderDataManager;
-import org.example.data.manager.ProductDataManager;
-
-
-import org.example.model.Customer;
-import org.example.model.Order;
-import org.example.model.Product;
-import org.example.service.CommonService;
-import org.example.service.CustomerService;
-import org.example.service.OrderService;
-import org.example.service.ProductService;
-import org.example.variable.common.CSVFilePath;
-
+import org.example.service.ErrorService;
+import org.example.until.ApplicationConfig;
+import org.example.until.FilePaths;
 
 import java.io.File;
-import java.io.IOException;
-
 
 public class Main {
-    public ProductDataManager productDataManage;
-    public static void main(String[] args) throws IOException {
-//            Main main = new Main();
-//            main.run(args);
-        CustomerDataManager customerDataManager = new CustomerDataManager();
-        CustomerService customerService = new CustomerService(customerDataManager);
-        ProductDataManager productDataManager = new ProductDataManager();
-        ProductService productService = new ProductService(productDataManager);
-        OrderDataManager orderDataManager = new OrderDataManager();
-        OrderService orderService =new OrderService(orderDataManager);
-        CommonService commonService=new CommonService(productDataManager,orderDataManager);
-        customerService.loadCustomers(CSVFilePath.CUSTOMER_INPUT_PATH.getFilePath());
+    private static final ApplicationConfig app = ApplicationConfig.getInstance();
+    public static String errorFilePath;
 
-
-        productService.loadProducts(CSVFilePath.PRODUCT_INPUT_PATH.getFilePath());
-
-
-        orderService.loadOrders(CSVFilePath.ORDER_INPUT_PATH.getFilePath());
-        productService.readKeyFromFIle(CSVFilePath.PRODUCT_IDS_INPUT_PATH.getFilePath());
-
-        commonService.getAndSaveOrderedProducts(CSVFilePath.ORDER_OUTPUT_PATH.getFilePath());
-
-
-
-
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.out.println("Usage: java -jar app.jar <functionCode> <folderPath>");
+            return;
+        }
+        String functionCode = args[0];
+        String folderPath = args[1];
+        run(functionCode, folderPath);
     }
 
-    private void executeFunction(String functionCode, String folderPath) {
+    public static void run(String functionCode, String folderPath) {
+        fileHandle(folderPath);
         switch (functionCode) {
             case "1":
-
+                loadData();
                 break;
             case "2.1":
-
+                addProduct();
+                break;
+            case "2.2":
+                updateProduct();
+                break;
+            case "2.3":
+                deleteProduct();
+                break;
+            case "3.1":
+                deleteCustomer();
+                break;
+            case "3.2":
+                addCustomer();
+                break;
+            case "3.3":
+                updateCustomer();
+                break;
+            case "4.1":
+                addOrder();
+                break;
+            case "4.2":
+                updateOrder();
+                break;
+            case "4.3":
+                deleteOrder();
+                break;
+            case "5.1":
+                searchTopProduct();
+                break;
+            case "5.2":
+                searchOrderByProduct();
                 break;
             default:
-                System.out.println("Invalid function code: " + functionCode);
-                System.exit(1);
+                ErrorService.logError(folderPath, "invalid function code");
         }
     }
-
-    private boolean validateArguments(String[] args) {
-        return args.length == 2;
+    private static String getInputPath(String folderPath) {
+        return folderPath + "/InputFolder";
     }
 
-    public void run(String[] args) {
-        if (!validateArguments(args)) {
-            System.out.println("Usage: java -jar my-console-app.jar <function_code> <folder_path>");
-            System.exit(1);
-        }
+    private static String getOutputPath(String folderPath) {
+        return folderPath + "/OutputFolder";
+    }
 
-        String functionCode = args[0];
-            String folderPath = args[1];
+    public static boolean isValidDirectory(String path) {
+        File dir = new File(path);
+        return dir.exists() && dir.isDirectory();
+    }
 
-        if (!isValidFolder(folderPath)) {
+    public static void fileHandle(String folderPath) {
+        if (!isValidDirectory(folderPath)) {
+            String projectRoot = System.getProperty("user.dir");
+            File dir = new File(projectRoot, "processing_folder_path");
             System.out.println("Invalid folder path: " + folderPath);
+            System.out.println("Using default directory: " + dir.getAbsolutePath());
             System.exit(1);
         }
-
-        executeFunction(functionCode, folderPath);
+        String inputPath = getInputPath(folderPath);
+        String outputPath = getOutputPath(folderPath);
+        FilePaths.setInputPaths(inputPath);
+        FilePaths.setOutputPaths(outputPath);
     }
 
-    private boolean isValidFolder(String folderPath) {
-        File folder = new File(folderPath);
-        return folder.exists() && folder.isDirectory();
+    private static void loadData() {
+        loadDataFromFile();
+        app.getProductService().saveToFile();
+        app.getCustomerService().saveToFile();
+        app.getOrderService().saveToFile();
     }
 
-    private void addProduct(String folderPath) {
-         productDataManage = new ProductDataManager();
-        ProductService dataService = new ProductService(productDataManage);
-        dataService.loadProducts(CSVFilePath.PRODUCT_INPUT_PATH.getFilePath());
-        dataService.loadProducts(CSVFilePath.PRODUCT_INPUT_NEW_PATH.getFilePath());
-        dataService.saveToFile(CSVFilePath.PRODUCT_OUTPUT_PATH.getFilePath());
+    private static void loadDataFromFile() {
+        app.getProductService().loadProducts();
+        app.getCustomerService().loadCustomers();
+        app.getOrderService().loadOrders();
     }
 
-    private void upDateProduct(String folderPath) {
-        productDataManage = new ProductDataManager();
-        ProductService dataService = new ProductService(productDataManage);
-        dataService.loadProducts(CSVFilePath.PRODUCT_INPUT_PATH.getFilePath());
-        dataService.loadForUpdate(CSVFilePath.PRODUCT_INPUT_EDIT_PATH.getFilePath());
-        dataService.saveToFile(CSVFilePath.PRODUCT_OUTPUT_PATH.getFilePath());
-
-    }
-    private void deleteProduct(String folderPath) {
-        productDataManage= new ProductDataManager();
-        ProductService dataService = new ProductService(productDataManage);
-        dataService.loadProducts(CSVFilePath.PRODUCT_INPUT_PATH.getFilePath());
-        dataService.loadForDelete(CSVFilePath.PRODUCT_INPUT_DELETE_PATH.getFilePath());
-        dataService.saveToFile(CSVFilePath.PRODUCT_OUTPUT_PATH.getFilePath());
-
+    //Product
+    private static void addProduct() {
+        loadDataFromFile();
+        app.getProductService().loadForAdd();
+        app.getProductService().saveToFile();
     }
 
+    private static void updateProduct() {
+        loadDataFromFile();
+        app.getProductService().loadForUpdate();
+        app.getProductService().saveToFile();
+    }
+
+    private static void deleteProduct() {
+        loadDataFromFile();
+        app.getProductService().loadForDelete();
+        app.getProductService().saveToFile();
+    }
+
+    //Customer
+    private static void addCustomer() {
+        loadDataFromFile();
+        app.getCustomerService().loadForAdd();
+        app.getCustomerService().saveToFile();
+    }
+
+    private static void updateCustomer() {
+        loadDataFromFile();
+        app.getCustomerService().loadForUpdate();
+        app.getCustomerService().saveToFile();
+    }
+
+    private static void deleteCustomer() {
+        loadDataFromFile();
+        app.getCustomerService().loadForDelete();
+        app.getCustomerService().saveToFile();
+    }
+
+    //Order
+    private static void addOrder() {
+        loadDataFromFile();
+        app.getOrderService().loadForAdd();
+        app.getOrderService().saveToFile();
+    }
+
+    private static void updateOrder() {
+        loadDataFromFile();
+        app.getOrderService().loadForUpdate();
+        app.getOrderService().saveToFile();
+
+    }
+
+    private static void deleteOrder() {
+        loadDataFromFile();
+        app.getOrderService().loadForDelete();
+        app.getOrderService().saveToFile();
+    }
+
+    //common
+    private static void searchTopProduct() {
+        loadDataFromFile();
+        app.getCommonService().getAndSaveTop3Products();
+    }
+
+    private static void searchOrderByProduct() {
+        loadDataFromFile();
+        app.getProductService().readKeyFromFIle();
+        app.getCommonService().getAndSaveOrderedProducts();
+    }
 }

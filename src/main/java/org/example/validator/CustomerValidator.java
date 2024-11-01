@@ -45,6 +45,7 @@ public class CustomerValidator extends BaseValidator<Customer> {
         messages.add(validateExistForUpdate(item.getEmail(), item.getPhoneNumber(),
                 CSVColumn.CustomerColumn.EMAIL.getDescription(),
                 CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.add(matchingRegex(item.getEmail(), EMAIL_PATTERN, CSVColumn.CustomerColumn.EMAIL.getDescription()));
         messages.add(matchingRegex(item.getPhoneNumber(), PHONE_PATTERN, CSVColumn.CustomerColumn.PHONE.getDescription()));
         messages.removeIf(ObjectUtils::isEmpty);
         if (!messages.isEmpty()) {
@@ -71,7 +72,10 @@ public class CustomerValidator extends BaseValidator<Customer> {
                 CSVColumn.CustomerColumn.ID.getDescription(),
                 CSVColumn.CustomerColumn.PHONE.getDescription()));
         messages.add(isEmpty(item.getName(), CSVColumn.CustomerColumn.NAME.getDescription()));
-        messages.add(isNotExist(item.getPhoneNumber(), CSVColumn.CustomerColumn.EMAIL.getDescription()));
+        messages.add(validateExistForUpdate(item.getEmail(), item.getPhoneNumber(),
+                CSVColumn.CustomerColumn.EMAIL.getDescription(),
+                CSVColumn.CustomerColumn.PHONE.getDescription()));
+        messages.add(matchingRegex(item.getEmail(), EMAIL_PATTERN, CSVColumn.CustomerColumn.EMAIL.getDescription()));
         messages.add(isNotExist(item.getPhoneNumber(), CSVColumn.CustomerColumn.PHONE.getDescription()));
         messages.removeIf(ObjectUtils::isEmpty);
         if (!messages.isEmpty()) {

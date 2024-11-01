@@ -9,6 +9,7 @@ import org.example.data.manager.ProductDataManager;
 import org.example.model.Customer;
 import org.example.model.Order;
 import org.example.model.Product;
+import org.example.until.FilePaths;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,15 +32,17 @@ public class CommonService {
         this.orderDataManager = orderDataManager;
     }
 
-    public void getAndSaveTop3Products(String filePath) {
+    public void getAndSaveTop3Products() {
+        String filePath = FilePaths.getPRODUCT_OUTPUT_PATH();
         if (products.isEmpty()) {
             products.clear();
         }
-        List<Product> top3Products = searchTopProduct();
+        List<Product> top3Products = searchTopProduct(filePath);
         products.addAll(top3Products);
         saveToFile(filePath,top3Products);
     }
-    public void getAndSaveOrderedProducts(String filePath) {
+    public void getAndSaveOrderedProducts() {
+        String filePath = FilePaths.getORDER_OUTPUT_PATH();
         if (orders.isEmpty()) {
             orders.clear();
         }
@@ -51,42 +54,44 @@ public class CommonService {
 
             List<String> productKeys = productDataManager.getKeys();
             List<Order> orders = orderDataManager.getData();
-        List<Order> matchingOrders = orders.stream()
+            List<Order> matchingOrders = orders.stream()
                 .filter(order -> order.getProductQuantities().keySet().stream()
                         .anyMatch(productKeys::contains))
                 .toList();
 
         return matchingOrders;
     }
-     private List<Product> searchTopProduct(){
-
+    private List<Product> searchTopProduct(String filePath) {
         try {
-            List<Product> dataproducts = productDataManager.getData();
+            List<Product> dataProducts = productDataManager.getData();
             List<Order> orders = orderDataManager.getData();
+
             Map<String, Integer> productOrderQuantities = orders.stream()
-                    .flatMap(order -> order.getProductQuantities().entrySet().stream()) // Lấy tất cả các entry productId và quantity
+                    .flatMap(order -> order.getProductQuantities().entrySet().stream())
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
                             Map.Entry::getValue,
                             Integer::sum
                     ));
+
             List<String> topProductIds = productOrderQuantities.entrySet().stream()
                     .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                     .limit(3)
                     .map(Map.Entry::getKey)
-                    .toList();
-            List<Product> topProducts = dataproducts.stream()
+                    .collect(Collectors.toList());
+
+            List<Product> topProducts = dataProducts.stream()
                     .filter(product -> topProductIds.contains(product.getId()))
-                    .toList();
-            topProducts.forEach(System.out::println);
+                    .collect(Collectors.toList());
+
             return topProducts;
-        }
-        catch (Exception e) {
-            ErrorService.logError("Search Error", e.getMessage());
+        } catch (Exception e) {
+            ErrorService.logError(filePath, e.getMessage());
             System.exit(1);
         }
         return List.of();
     }
+
 
     public void clearFile(String filePath) {
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
@@ -116,7 +121,5 @@ public class CommonService {
         }
     }
 
-    public List<Product> getDataSearch() {
-        return products;
-    }
+
 }

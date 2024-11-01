@@ -50,8 +50,6 @@ public class ProductValidator extends BaseValidator<Product> {
         return null;
     }
 
-
-
     @Override
     public ValidationError validateToDelete(Product item, String line) {
         List<String> messages = new ArrayList<>();
@@ -77,7 +75,6 @@ public class ProductValidator extends BaseValidator<Product> {
         List<String> messages = new ArrayList<>();
         messages.add(isEmpty(key, CSVColumn.ProductColumn.ID.getDescription()));
         messages.add(isNotExist(key, CSVColumn.ProductColumn.ID.getDescription()));
-
         messages.removeIf(ObjectUtils::isEmpty);
         if (!messages.isEmpty()) {
             return new ValidationError(getFilePath(), line, messages.toArray(new String[0]));

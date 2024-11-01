@@ -4,6 +4,7 @@ import com.opencsv.exceptions.CsvException;
 import lombok.Getter;
 import org.example.data.manager.CustomerDataManager;
 import org.example.model.Customer;
+import org.example.until.FilePaths;
 import org.example.variable.common.OperationMode;
 
 
@@ -21,7 +22,8 @@ public class CustomerService {
         customerDataManager.clearModel();
     }
 
-    public void loadCustomers(String filePath) {
+    public void loadCustomers() {
+        String filePath = FilePaths.getCUSTOMER_INPUT_PATH();
         try {
             customerDataManager.processData(filePath, OperationMode.LOAD);
             storedData();
@@ -29,7 +31,8 @@ public class CustomerService {
             ErrorService.logError(filePath, e.getMessage());
         }
     }
-    public void loadForAdd(String filePath) {
+    public void loadForAdd() {
+        String filePath =FilePaths.getCUSTOMER_NEW_PATH();
         try {
             customerDataManager.processData(filePath, OperationMode.REPLACE);
         } catch (IOException | CsvException e) {
@@ -37,7 +40,9 @@ public class CustomerService {
         }
     }
 
-    public void loadForUpdate(String filePath) {
+    public void loadForUpdate() {
+        String filePath = FilePaths.getCUSTOMER_UPDATE_PATH();
+
         try {
             customerDataManager.processData(filePath, OperationMode.UPDATE);
         } catch (IOException | CsvException e) {
@@ -45,7 +50,8 @@ public class CustomerService {
         }
     }
 
-    public void loadForDelete(String filePath) {
+    public void loadForDelete() {
+        String filePath = FilePaths.getCUSTOMER_DELETE_PATH();
         try {
             customerDataManager.processData(filePath, OperationMode.DELETE);
         } catch (IOException | CsvException e) {
@@ -53,7 +59,8 @@ public class CustomerService {
         }
     }
 
-    public void saveToFile(String filePath) {
+    public void saveToFile() {
+        String filePath = FilePaths.getCUSTOMER_OUTPUT_PATH();
         try {
             storedData();
             customerDataManager.saveData(filePath, getCustomers());
